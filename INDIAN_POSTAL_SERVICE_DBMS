@@ -1,0 +1,485 @@
+AEnter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 8
+Server version: 8.0.28 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> create database INDIAN_POSTAL_SERVICE;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> USE INDIAN_POSTAL_SERVICE;
+Database changed
+mysql> CREATE TABLE PostOffice (
+    ->     PostOfficeID INT PRIMARY KEY,
+    ->     Name VARCHAR(100) NOT NULL,
+    ->     Location VARCHAR(100) NOT NULL,
+    ->     PinCode VARCHAR(10) UNIQUE NOT NULL
+    -> );
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> CREATE TABLE Employee (
+    ->     EmployeeID INT PRIMARY KEY,
+    ->     Name VARCHAR(100) NOT NULL,
+    ->     Position VARCHAR(50) NOT NULL,
+    ->     PostOfficeID INT,
+    ->     FOREIGN KEY (PostOfficeID) REFERENCES PostOffice(PostOfficeID)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> CREATE TABLE Customer (
+    ->     CustomerID INT PRIMARY KEY,
+    ->     Name VARCHAR(100) NOT NULL,
+    ->     Address VARCHAR(255) NOT NULL,
+    ->     Phone VARCHAR(15) UNIQUE NOT NULL
+    -> );
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> CREATE TABLE Parcel (
+    ->     ParcelID INT PRIMARY KEY,
+    ->     Weight DECIMAL(5,2) CHECK (Weight > 0),
+    ->     DestinationPinCode VARCHAR(10),
+    ->     CustomerID INT,
+    ->     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+    -> );
+Query OK, 0 rows affected (0.06 sec)
+
+
+mysql> CREATE TABLE Transaction (
+    ->     TransactionID INT PRIMARY KEY,
+    ->     ParcelID INT,
+    ->     EmployeeID INT,
+    ->     Date DATE DEFAULT NULL,  -- Set default to NULL
+    ->     FOREIGN KEY (ParcelID) REFERENCES Parcel(ParcelID),
+    ->     FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+
+mysql>  INSERT INTO PostOffice (PostOfficeID, Name, Location, PinCode) VALUES
+    -> (1, 'Connaught Place', 'Delhi', '110001'),
+    -> (2, 'Bengaluru Main', 'Bengaluru', '560001'),
+    -> (3, 'Chennai Central', 'Chennai', '600001'),
+    -> (4, 'Mumbai CST', 'Mumbai', '400001'),
+    -> (5, 'Kolkata GPO', 'Kolkata', '700001');
+Query OK, 5 rows affected (0.03 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Employee (EmployeeID, Name, Position, PostOfficeID) VALUES
+    -> (1, 'Rajesh Kumar', 'Clerk', 1),
+    -> (2, 'Anita Sharma', 'Manager', 2),
+    -> (3, 'Suresh Gupta', 'Assistant Clerk', 3),
+    -> (4, 'Priya Desai', 'Postmaster', 4),
+    -> (5, 'Vikram Singh', 'Delivery Boy', 5);
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+
+mysql> INSERT INTO Customer (CustomerID, Name, Address, Phone) VALUES
+    -> (1, 'John Doe', '123 Main St., Delhi', '9876543210'),
+    -> (2, 'Jane Smith', '456 Elm St., Bengaluru', '9123456789'),
+    -> (3, 'Alice Brown', '789 Maple St., Chennai', '9988776655'),
+    -> (4, 'Bob White', '321 Oak St., Mumbai', '8877665544'),
+    -> (5, 'Charlie Green', '654 Pine St., Kolkata', '7766554433');
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Parcel (ParcelID, Weight, DestinationPinCode, CustomerID) VALUES
+    -> (1, 2.5, '110001', 1),
+    -> (2, 0.75, '560001', 2),
+    -> (3, 1.25, '600001', 3),
+    -> (4, 3.00, '400001', 4),
+    -> (5, 0.50, '700001', 5);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Transaction (TransactionID, ParcelID, EmployeeID) VALUES
+    -> (1, 1, 1),   -- Rajesh Kumar processed Parcel ID 1
+    -> (2, 2, 2),   -- Anita Sharma processed Parcel ID 2
+    -> (3, 3, 3),   -- Suresh Gupta processed Parcel ID 3
+    -> (4, 4, 4),   -- Priya Desai processed Parcel ID 4
+    -> (5, 5, 5);   -- Vikram Singh processed Parcel ID 5
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM POSTOFFICE;
++--------------+-----------------+-----------+---------+
+| PostOfficeID | Name            | Location  | PinCode |
++--------------+-----------------+-----------+---------+
+|            1 | Connaught Place | Delhi     | 110001  |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |
+|            3 | Chennai Central | Chennai   | 600001  |
+|            4 | Mumbai CST      | Mumbai    | 400001  |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |
++--------------+-----------------+-----------+---------+
+5 rows in set (0.01 sec)
+
+mysql> SELECT * FROM EMPLOYEE;
++------------+--------------+-----------------+--------------+
+| EmployeeID | Name         | Position        | PostOfficeID |
++------------+--------------+-----------------+--------------+
+|          1 | Rajesh Kumar | Clerk           |            1 |
+|          2 | Anita Sharma | Manager         |            2 |
+|          3 | Suresh Gupta | Assistant Clerk |            3 |
+|          4 | Priya Desai  | Postmaster      |            4 |
+|          5 | Vikram Singh | Delivery Boy    |            5 |
++------------+--------------+-----------------+--------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT * FROM PARCEL;
++----------+--------+--------------------+------------+
+| ParcelID | Weight | DestinationPinCode | CustomerID |
++----------+--------+--------------------+------------+
+|        1 |   2.50 | 110001             |          1 |
+|        2 |   0.75 | 560001             |          2 |
+|        3 |   1.25 | 600001             |          3 |
+|        4 |   3.00 | 400001             |          4 |
+|        5 |   0.50 | 700001             |          5 |
++----------+--------+--------------------+------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT * FROM CUSTOMER;
++------------+---------------+------------------------+------------+
+| CustomerID | Name          | Address                | Phone      |
++------------+---------------+------------------------+------------+
+|          1 | John Doe      | 123 Main St., Delhi    | 9876543210 |
+|          2 | Jane Smith    | 456 Elm St., Bengaluru | 9123456789 |
+|          3 | Alice Brown   | 789 Maple St., Chennai | 9988776655 |
+|          4 | Bob White     | 321 Oak St., Mumbai    | 8877665544 |
+|          5 | Charlie Green | 654 Pine St., Kolkata  | 7766554433 |
++------------+---------------+------------------------+------------+
+5 rows in set (0.01 sec)
+
+mysql> SELECT * FROM TRANSACTION;
++---------------+----------+------------+------+
+| TransactionID | ParcelID | EmployeeID | Date |
++---------------+----------+------------+------+
+|             1 |        1 |          1 | NULL |
+|             2 |        2 |          2 | NULL |
+|             3 |        3 |          3 | NULL |
+|             4 |        4 |          4 | NULL |
+|             5 |        5 |          5 | NULL |
++---------------+----------+------------+------+
+5 rows in set (0.01 sec)
+
+mysql> CREATE VIEW AllPostOffices AS SELECT * FROM PostOffice;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT * FROM AllPostOffices;
++--------------+-----------------+-----------+---------+
+| PostOfficeID | Name            | Location  | PinCode |
++--------------+-----------------+-----------+---------+
+|            1 | Connaught Place | Delhi     | 110001  |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |
+|            3 | Chennai Central | Chennai   | 600001  |
+|            4 | Mumbai CST      | Mumbai    | 400001  |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |
++--------------+-----------------+-----------+---------+
+5 rows in set (0.02 sec)
+
+mysql> SELECT TABLE_NAME
+    -> FROM information_schema.VIEWS
+    -> WHERE TABLE_SCHEMA = 'INDIAN_POSTAL_SERVICE';
++----------------+
+| TABLE_NAME     |
++----------------+
+| allpostoffices |
++----------------+
+1 row in set (0.02 sec)
+
+mysql> SHOW CREATE VIEW AllPostOffices;
++----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+
+| View           | Create View
+
+                                                      | character_set_client | collation_connection |
++----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+
+| allpostoffices | CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `allpostoffices` AS select `postoffice`.`PostOfficeID` AS `PostOfficeID`,`postoffice`.`Name` AS `Name`,`postoffice`.`Location` AS `Location`,`postoffice`.`PinCode` AS `PinCode` from `postoffice` | cp850     | cp850_general_ci     |
++----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+
+1 row in set (0.01 sec)
+
+mysql> CREATE VIEW ActiveEmployees AS SELECT Name FROM Employee WHERE Position = 'Clerk';
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT * FROM ACTIVEEMPLOYEES;
++--------------+
+| Name         |
++--------------+
+| Rajesh Kumar |
++--------------+
+1 row in set (0.01 sec)
+
+mysql> CREATE VIEW CustomerParcels AS
+    -> SELECT p.ParcelID FROM Parcel p
+    -> WHERE p.CustomerID IN (SELECT c.CustomerID FROM Customer c WHERE c.Address LIKE '%Delhi%');
+Query OK, 0 rows affected (0.01 sec)
+
+mysql>
+mysql> SELECT * FROM CUSTOMERPARCELS;
++----------+
+| ParcelID |
++----------+
+|        1 |
++----------+
+1 row in set (0.01 sec)
+
+mysql> CREATE VIEW EmployeeTransactions AS
+    -> SELECT e.Name AS EmployeeName, t.Date
+    -> FROM Employee e
+    -> JOIN Transaction t ON e.EmployeeID = t.EmployeeID;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT * FROM EMPLOYEETRANSACTIONS;
++--------------+------+
+| EmployeeName | Date |
++--------------+------+
+| Rajesh Kumar | NULL |
+| Anita Sharma | NULL |
+| Suresh Gupta | NULL |
+| Priya Desai  | NULL |
+| Vikram Singh | NULL |
++--------------+------+
+5 rows in set (0.01 sec)
+
+mysql> UPDATE ActiveEmployees SET Name = 'Ravi Kumar' WHERE Name = 'Rajesh Kumar';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM EMPLOYEETRANSACTIONS;
++--------------+------+
+| EmployeeName | Date |
++--------------+------+
+| Ravi Kumar   | NULL |
+| Anita Sharma | NULL |
+| Suresh Gupta | NULL |
+| Priya Desai  | NULL |
+| Vikram Singh | NULL |
++--------------+------+
+5 rows in set (0.01 sec)
+
+mysql> SELECT * FROM PARCEL;
++----------+--------+--------------------+------------+
+| ParcelID | Weight | DestinationPinCode | CustomerID |
++----------+--------+--------------------+------------+
+|        1 |   2.50 | 110001             |          1 |
+|        2 |   0.75 | 560001             |          2 |
+|        3 |   1.25 | 600001             |          3 |
+|        4 |   3.00 | 400001             |          4 |
+|        5 |   0.50 | 700001             |          5 |
++----------+--------+--------------------+------------+
+5 rows in set (0.01 sec)
+
+mysql> DELETE FROM Transaction WHERE ParcelID IN (SELECT ParcelID FROM Parcel WHERE Weight < 1);
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> DELETE FROM Parcel WHERE Weight < 1;
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> SELECT * FROM Customer;
++------------+---------------+------------------------+------------+
+| CustomerID | Name          | Address                | Phone      |
++------------+---------------+------------------------+------------+
+|          1 | John Doe      | 123 Main St., Delhi    | 9876543210 |
+|          2 | Jane Smith    | 456 Elm St., Bengaluru | 9123456789 |
+|          3 | Alice Brown   | 789 Maple St., Chennai | 9988776655 |
+|          4 | Bob White     | 321 Oak St., Mumbai    | 8877665544 |
+|          5 | Charlie Green | 654 Pine St., Kolkata  | 7766554433 |
++------------+---------------+------------------------+------------+
+5 rows in set (0.01 sec)
+
+mysql> INSERT INTO Customer (CustomerID, Name, Address, Phone) VALUES
+    -> (6, 'Alice Brown', '789 Maple St., Delhi', '9988776655'),
+    -> (7, 'Bob White', '321 Oak St., Bengaluru', '8877665544'),
+    -> (8, 'Charlie Green', '654 Pine St., Delhi', '7766554433');
+ERROR 1062 (23000): Duplicate entry '9988776655' for key 'customer.Phone'
+mysql> UPDATE Employee SET Position = CASE WHEN Position = 'Clerk' THEN 'Senior Clerk' ELSE Position END;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 5  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM EMPLOYEE;
++------------+--------------+-----------------+--------------+
+| EmployeeID | Name         | Position        | PostOfficeID |
++------------+--------------+-----------------+--------------+
+|          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|          2 | Anita Sharma | Manager         |            2 |
+|          3 | Suresh Gupta | Assistant Clerk |            3 |
+|          4 | Priya Desai  | Postmaster      |            4 |
+|          5 | Vikram Singh | Delivery Boy    |            5 |
++------------+--------------+-----------------+--------------+
+5 rows in set (0.00 sec)
+
+mysql> BEGIN TRANSACTION;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> UPDATE Parcel SET Weight = Weight + 0.5 WHERE ParcelID = 1;
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> COMMIT;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SAVEPOINT BeforeUpdate;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> UPDATE Parcel SET Weight = Weight + 0.25 WHERE ParcelID = 2;
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+
+mysql> ROLLBACK TO BeforeUpdate;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT * FROM PostOffice CROSS JOIN Employee;
++--------------+-----------------+-----------+---------+------------+--------------+-----------------+--------------+
+| PostOfficeID | Name            | Location  | PinCode | EmployeeID | Name         | Position        | PostOfficeID |
++--------------+-----------------+-----------+---------+------------+--------------+-----------------+--------------+
+|            5 | Kolkata GPO     | Kolkata   | 700001  |          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|            4 | Mumbai CST      | Mumbai    | 400001  |          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|            3 | Chennai Central | Chennai   | 600001  |          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|            1 | Connaught Place | Delhi     | 110001  |          1 | Ravi Kumar   | Senior Clerk    |            1 |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |          2 | Anita Sharma | Manager         |            2 |
+|            4 | Mumbai CST      | Mumbai    | 400001  |          2 | Anita Sharma | Manager         |            2 |
+|            3 | Chennai Central | Chennai   | 600001  |          2 | Anita Sharma | Manager         |            2 |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |          2 | Anita Sharma | Manager         |            2 |
+|            1 | Connaught Place | Delhi     | 110001  |          2 | Anita Sharma | Manager         |            2 |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |          3 | Suresh Gupta | Assistant Clerk |            3 |
+|            4 | Mumbai CST      | Mumbai    | 400001  |          3 | Suresh Gupta | Assistant Clerk |            3 |
+|            3 | Chennai Central | Chennai   | 600001  |          3 | Suresh Gupta | Assistant Clerk |            3 |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |          3 | Suresh Gupta | Assistant Clerk |            3 |
+|            1 | Connaught Place | Delhi     | 110001  |          3 | Suresh Gupta | Assistant Clerk |            3 |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |          4 | Priya Desai  | Postmaster      |            4 |
+|            4 | Mumbai CST      | Mumbai    | 400001  |          4 | Priya Desai  | Postmaster      |            4 |
+|            3 | Chennai Central | Chennai   | 600001  |          4 | Priya Desai  | Postmaster      |            4 |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |          4 | Priya Desai  | Postmaster      |            4 |
+|            1 | Connaught Place | Delhi     | 110001  |          4 | Priya Desai  | Postmaster      |            4 |
+|            5 | Kolkata GPO     | Kolkata   | 700001  |          5 | Vikram Singh | Delivery Boy    |            5 |
+|            4 | Mumbai CST      | Mumbai    | 400001  |          5 | Vikram Singh | Delivery Boy    |            5 |
+|            3 | Chennai Central | Chennai   | 600001  |          5 | Vikram Singh | Delivery Boy    |            5 |
+|            2 | Bengaluru Main  | Bengaluru | 560001  |          5 | Vikram Singh | Delivery Boy    |            5 |
+|            1 | Connaught Place | Delhi     | 110001  |          5 | Vikram Singh | Delivery Boy    |            5 |
++--------------+-----------------+-----------+---------+------------+--------------+-----------------+--------------+
+25 rows in set (0.00 sec)
+
+mysql> SELECT CustomerID FROM Parcel GROUP BY CustomerID HAVING COUNT(DISTINCT ParcelID) = (SELECT COUNT(*) FROM Parcel);
+Empty set (0.02 sec)
+
+mysql> SELECT p.ParcelID AS ID FROM Parcel p;
++----+
+| ID |
++----+
+|  1 |
+|  3 |
+|  4 |
++----+
+3 rows in set (0.00 sec)
+
+mysql> SELECT * FROM Customer c1 WHERE c1.CustomerID IN (SELECT c2.CustomerID FROM Customer c2 WHERE c2.Name = 'John Doe');
++------------+----------+---------------------+------------+
+| CustomerID | Name     | Address             | Phone      |
++------------+----------+---------------------+------------+
+|          1 | John Doe | 123 Main St., Delhi | 9876543210 |
++------------+----------+---------------------+------------+
+1 row in set (0.01 sec)
+
+mysql> SELECT p.ParcelID
+    -> FROM Parcel p
+    -> WHERE p.CustomerID IN (
+    ->     SELECT c.CustomerID
+    ->     FROM Customer c
+    ->     JOIN Parcel p2 ON c.CustomerID = p2.CustomerID
+    ->     JOIN Transaction t ON p2.ParcelID = t.ParcelID
+    -> );
++----------+
+| ParcelID |
++----------+
+|        1 |
+|        3 |
+|        4 |
++----------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT * FROM Customer WHERE CustomerID NOT IN (SELECT CustomerID FROM Transaction);
+Empty set (0.01 sec)
+
+mysql> -- String Function Example
+mysql> SELECT UPPER(Name) AS UpperCaseName FROM Customer;
++---------------+
+| UpperCaseName |
++---------------+
+| JOHN DOE      |
+| JANE SMITH    |
+| ALICE BROWN   |
+| BOB WHITE     |
+| CHARLIE GREEN |
++---------------+
+5 rows in set (0.01 sec)
+
+
+mysql> -- Numeric Function Example
+mysql> SELECT ROUND(Weight) AS RoundedWeight FROM Parcel;
++---------------+
+| RoundedWeight |
++---------------+
+|             3 |
+|             1 |
+|             3 |
++---------------+
+3 rows in set (0.00 sec)
+
+
+mysql> -- Date-Time Function Example
+mysql> SELECT CURRENT_DATE AS TodayDate;
++------------+
+| TodayDate  |
++------------+
+| 2024-10-16 |
++------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT e.Name AS EmployeeName , t.Date FROM Employee e LEFT JOIN Transaction t ON e.EmployeeID = t.EmployeeID;
++--------------+------+
+| EmployeeName | Date |
++--------------+------+
+| Ravi Kumar   | NULL |
+| Anita Sharma | NULL |
+| Suresh Gupta | NULL |
+| Priya Desai  | NULL |
+| Vikram Singh | NULL |
++--------------+------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT e.Name AS EmployeeName , t.Date FROM Employee e RIGHT JOIN Transaction t ON e.EmployeeID = t.EmployeeID;
++--------------+------+
+| EmployeeName | Date |
++--------------+------+
+| Ravi Kumar   | NULL |
+| Suresh Gupta | NULL |
+| Priya Desai  | NULL |
++--------------+------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT p.ParcelID AS ParcelIdentifier , c.Name AS CustomerName
+    -> FROM Parcel p INNER JOIN Customer c ON p.CustomerID = c.CustomerID INNER JOIN Transaction t ON p.ParcelID = t.ParcelID;
++------------------+--------------+
+| ParcelIdentifier | CustomerName |
++------------------+--------------+
+|                1 | John Doe     |
+|                3 | Alice Brown  |
+|                4 | Bob White    |
++------------------+--------------+
+3 rows in set (0.00 sec)
+
+mysql> ALTER TABLE PostOffice ADD CONSTRAINT fk_employee FOREIGN KEY (PostOfficeID) REFERENCES Employee(PostOfficeID);
+Query OK, 5 rows affected (0.12 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+
+mysql> ALTER TABLE Employee MODIFY Position VARCHAR(50) NULL;
+Query OK, 0 rows affected (0.11 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
